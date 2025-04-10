@@ -8,7 +8,6 @@ app = Flask(__name__)
 mp_pose = mp.solutions.pose
 pose = mp_pose.Pose(static_image_mode=True)
 
-
 def analyze_image(image):
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     results = pose.process(image_rgb)
@@ -23,5 +22,9 @@ def analyze_image(image):
             poses.append("standing")
     return poses
 
-
-result = process_local_image('path/to/image.jpg')
+# Load the image properly before processing
+image = cv2.imread('image.png')
+if image is not None:
+    result = analyze_image(image)
+else:
+    print("Error: Could not load image")
