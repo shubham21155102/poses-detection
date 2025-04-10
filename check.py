@@ -24,27 +24,4 @@ def analyze_image(image):
     return poses
 
 
-@app.route('/detect_poses', methods=['POST'])
-def detect_poses():
-    if 'file' not in request.files:
-        return jsonify({"error": "No file part"}), 400
-    file = request.files['file']
-    image = cv2.imdecode(np.frombuffer(
-        file.read(), np.uint8), cv2.IMREAD_COLOR)
-    poses = analyze_image(image)
-    return jsonify({"results": [{"poses": poses}]})
-
-# New local file processing function
-
-
-def process_local_image(file_path):
-    image = cv2.imread(file_path)
-    if image is not None:
-        return analyze_image(image)
-    return ["Error: Could not read image"]
-
-
-if __name__ == '__main__':
-    # Example usage for local files:
-    # print(process_local_image('path/to/your/image.jpg'))
-    app.run(debug=True)
+result = process_local_image('path/to/image.jpg')
