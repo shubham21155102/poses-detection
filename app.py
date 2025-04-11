@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
 import numpy as np
@@ -6,6 +7,8 @@ import io
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
+CORS(app,origin=["*"])
+
 model = load_model('custom_model.h5')
 img_width, img_height = 48, 48
 class_labels=["balancing","falling",  "hugging",  "⁠lookingup",	"sitting"  ,"standing"]
