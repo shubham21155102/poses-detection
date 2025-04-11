@@ -1,44 +1,53 @@
 from flask import Flask, request, jsonify
-import cv2
-import mediapipe as mp
-import numpy as np
 from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing import image as keras_image
-
-# Load the custom model
-custom_model = load_model('custom_model.h5')
-
-# Example: Define image size and class labels
-img_width, img_height = 224, 224  # Adjust to your model's input size
-class_labels = ['sitting', 'standing']  # Modify based on your dataset
+from tensorflow.keras.preprocessing import image
+import numpy as np
+import io
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
+model = load_model('custom_model.h5')
+img_width, img_height = 48, 48
+class_labels=["balancing","falling",  "hugging",  "⁠lookingup",	"sitting"  ,"standing"]
+allowed_extensions = {'png', 'jpg', 'jpeg'}
 
-mp_pose = mp.solutions.pose
-pose = mp_pose.Pose(static_image_mode=True)
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in allowed_extensions
 
-
-
-def process_local_image(file_path):
-    image = cv2.imread(file_path)
-    if image is not None:
-        return analyze_image(image)
-    return ["Error: Could not read image"]
-
-@app.route('/predict_custom_model', methods=['POST'])
-def predict_custom_model():
+@app.route('/predict', methods=['POST'])
+def predict():
     if 'file' not in request.files:
         return jsonify({"error": "No file part"}), 400
+    
     file = request.files['file']
-    img = keras_image.load_img(file, target_size=(img_width, img_height), color_mode='grayscale')
-    img_array = keras_image.img_to_array(img)
-    img_array = np.expand_dims(img_array, axis=0)
-    img_array = img_array / 255.0
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+    if not allowed_file(file.filename):
+        return jsonify({"error": "Invalid file type"}), 400
+    
+    try:
+        file_content = file.read()
+        file_bytes = io.BytesIO(file_content)
+        img = image.load_img(file_bytes, 
+                           target_size=(img_width, img_height),
+                           color_mode='grayscale')
+        img_array = image.img_to_array(img)
+        img_array = np.expand_dims(img_array, axis=0)
+        img_array = img_array / 255.0  # Normalize
 
-    prediction = custom_model.predict(img_array)
-    predicted_class = np.argmax(prediction)
-
-    return jsonify({"predicted_class": class_labels[predicted_class]})
+        # Make prediction
+        prediction = model.predict(img_array)
+        predicted_class = np.argmax(prediction)
+        confidence = float(np.max(prediction))
+        print("Predicted Class ",predicted_class)
+        return jsonify({
+            "predicted_class": class_labels[predicted_class],
+            "confidence": confidence
+        })
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
