@@ -1,3 +1,4 @@
+
 # Pose Detection System
 
 ![Pose Detection](image.png)
@@ -18,6 +19,7 @@ A powerful ML-powered application that can identify human poses from images with
 - Flask REST API
 - TensorFlow/Keras deep learning model
 - Python image processing
+- spaCy NLP for intelligent dataset curation
 
 ### Frontend
 
@@ -39,6 +41,7 @@ A powerful ML-powered application that can identify human poses from images with
 - Python 3.8+ with pip
 - Node.js and npm
 - Git (with git-lfs for model files)
+- spaCy with English language model (`python -m spacy download en_core_web_sm`)
 
 ### Installation
 
@@ -74,7 +77,18 @@ A powerful ML-powered application that can identify human poses from images with
 
 ## 📸 Dataset
 
-The model was trained on carefully curated images from Unsplash covering six human pose categories. The `download.py` script demonstrates how images were collected and filtered by aspect ratio for optimal training.
+The model was trained on carefully curated images from Unsplash covering six human pose categories. We use two methods for dataset collection:
+
+1. **Basic collection** (`download.py`): Filters images by aspect ratio for basic dataset curation.
+2. **Advanced NLP-based collection** (`script.py`): Uses spaCy for intelligent filtering:
+
+   - Performs lemmatization to match various forms of action words
+   - Analyzes image alt-text descriptions
+   - Verifies image integrity before saving
+   - Implements rate limiting to respect API guidelines
+   - Downloads highest quality training samples based on semantic relevance
+
+This dual approach ensures a diverse, high-quality dataset that improves model performance.
 
 ## 🛠️ API Endpoints
 
@@ -98,4 +112,4 @@ The model was trained on carefully curated images from Unsplash covering six hum
 
 ---
 
-Made with ❤️ by [Your Name]
+Made with ❤️ by Shubham
