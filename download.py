@@ -41,8 +41,13 @@ def fetch_filtered_images(page_url, download_folder):
         except Exception as e:
             print(f"Error with {full_url}: {e}")
 
-search_term = "person-balancing"
-url = f"https://unsplash.com/s/photos/{search_term}"
-download_folder = "dataset/train/balancing"
-
-fetch_filtered_images(url, download_folder)
+# search_term = "person-balancing"
+# url = f"https://unsplash.com/s/collections/{search_term}"
+# download_folder = "dataset/test/balancing"
+search_terms=["person-balancing","person-falling","person-hugging","person-lookingup","person-sitting","person-standing"]
+download_folders=["balancing","falling","hugging","lookingup","sitting","standing"]
+for i in range(6):
+    search_term=search_terms[i]
+    download_folder=f"dataset/test/{download_folders[i]}"
+    url= f"https://unsplash.com/s/collections/{search_term}"
+    fetch_filtered_images(url, download_folder)
